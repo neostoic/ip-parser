@@ -6,10 +6,10 @@ from datetime import datetime
 
 class Request(object):
     def __init__(self, args):
-        """Constructor for a FourSquare request."""
+        """Constructor for a request."""
         self.args = args
         self.timestamp = datetime.now()
-
+        
         def args():
             doc = "Accessor methods for the passed arguments. Always give a dictionary with your arguments."
             def fget(self):
@@ -25,27 +25,21 @@ class Request(object):
                 del self.args
             
             return locals()
-        
-        
+            
     def url(self):
         return self.args["url"]
-
-        
+    
     def typeOfReq(self):
         return self.args["typeofreq"]
-        
     
     def host(self):
         return self.args["host"]
-    
-
+        
     def __unicode__(self):
         return u"<%s: (%s)>" % (self.__class__.__name__, self.args)
-
         
     def __repr__(self):
-        return "<%s: (%s)>" % (self.__class__.__name__, self.args)
-        
+        return "<%s: (%s)>" % (self.__class__.__name__, self.args)    
         
     def __str__(self):
         return "<%s: (%s)>" % (self.__class__.__name__, self.args)
@@ -86,4 +80,8 @@ if __name__ == "__main__":
     print(r.host())
     print(r.url())
     print(r.typeOfReq())
+
+    URL = 'business_review_search?term=yelp&tl_lat=37.9&tl_long=-122.5&br_lat=37.788022&br_long=-122.399797&limit=3&ywsid=XXXXXXXXXXXXXXXXXX'
+    r = Request({'host': 'api.yelp.com', 'url': URL, 'typeofreq': 'GET', 'ywsid': YWSID})
+    
 

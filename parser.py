@@ -21,43 +21,43 @@ except ImportError as e:
     print("[Error occurred: %d - %s]" % (e.errno, e.strerror))
 
 
-class FSQConnector(threading.Thread):
+class BaseConnector(threading.Thread):
     """
-    Simple class to make a request to FourSquare API and retrieve
+    Base connector class to make a request to various APIs and retrieve
     data.
     """
     def __init__(self, request, callback=None):
-        if debug: print("%s.__init__()" % (self.__class__.__name__))
-
+        if debug: print('%s.__init__()' % (self.__class__.__name__))
         assert request.__class__.__name__ != Request.__class__.__name__
         self.callback = callback
         self.request = request
         threading.Thread.__init__(self)
         
         def request():
-            doc = "information about the request you want to make"
+            doc = 'information about the request you want to make'
             
             def fget(self):
                 return self._request
             
             def fset(self, request):
                 self._request = request
-        
+            
             def fdel(self):
                 del self._request
             
             return locals()
-    
+        
     def __str__(self):
         return self.__class__.__name__
 
     def __unicode__(self):
         return self.__class__.__name__
-
+    
     def run(self):
         """Open an HTTPS connection to the FourSquare API."""
         connection = httplib.HTTPSConnection(self.request.host())
         connection.request(self.request.typeOfReq(), self.request.url())
+
         try:
             resp = connection.getresponse()
             connection.connect()
@@ -87,13 +87,53 @@ class FSQConnector(threading.Thread):
 
         # Close the connection after the reception of data.
         connection.close()
-    
+        
     def read_response(self, response):
         """Get the response from the stream and print it."""
         data = response.read()
         if debug:
             print(data, "\n")
 
+
+class YelpConnector(BaseConnector):
+    """
+    Class to make a request to Yelp API and retrieve data.
+    """
+    def __init__(self, request, callback=None):
+        BaseConnector.__init__(self, request, callback)
+    
+    def __str__(self):
+        return self.__class__.__name__
+    
+    def __unicode(self):
+        return self.__class__.__name__
+
+    def run(self):
+        BaseConnector.run(self)
+    
+    def read_response(self, response):
+        BaseConnector.read_response(self, response)
+        
+        
+class FSQConnector(BaseConnector):
+    """
+    Class to make a request to FourSquare API and retrieve
+    data.
+    """
+    def __init__(self, request, callback=None):
+        BaseConnector.__init__(self, request, callback)
+    
+    def __str__(self):
+        return self.__class__.__name__
+    
+    def __unicode(self):
+        return self.__class__.__name__
+
+    def run(self):
+        BaseConnector.run(self)
+    
+    def read_response(self, response):
+        BaseConnector.read_response(self, response)
 
 
 class Parser(threading.Thread):
@@ -150,6 +190,20 @@ if __name__ == "__main__":
     # More about userless: https://developer.foursquare.com/overview/auth.html
     URL = "/v2/venues/search?ll={lat},{long}&client_id={client_id}&client_secret={client_secret}&v={date}".format(client_id=CLIENT_ID, client_secret=CLIENT_SEC, date=DATE, lat="35.339879", long="25.134591")
     
-    r = Request({"host": "api.foursquare.com", "url": URL, "typeofreq": "GET", "client_id": CLIENT_ID, "client_secret": CLIENT_SEC})
+    r = Request({"host": "api.foursquare.com", "url": URL, "typeofreq": "GET"})
     connector = FSQConnector(r)
     connector.start()
+
+    # Create a userless url, using the client id, the client secret 
+    # and the current date in the specified format.
+    # More about userless: http://www.yelp.com/developers/documentation/search_api#sampleResponse
+    #URL = 'business_review_search?term=yelp&tl_lat=37.9&tl_long=-122.5&br_lat=37.788022&br_long=-122.399797&limit=3&ywsid=XXXXXXXXXXXXXXXXXX'
+    #r = Request({'host': 'api.yelp.com', 'url': URL, 'typeofreq': 'GET'})
+    #connector = YelpConnector(r)
+    #connector.start()
+    
+    #URL = "/maps/api/service/output?params"
+    #r = Request({"host": "maps.googleapis.com", "url": URL, "typeofreq": "GET"})
+    #connector = GoogleConnector(r)
+    #connector.start()
+    
