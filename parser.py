@@ -55,8 +55,8 @@ class BaseConnector(threading.Thread):
     
     def run(self):
         """Open an HTTPS connection to the FourSquare API."""
-        connection = httplib.HTTPSConnection(self.request.host())
-        connection.request(self.request.typeOfReq(), self.request.url())
+        connection = httplib.HTTPSConnection(self.request.host)
+        connection.request(self.request.typeOfReq, self.request.url)
 
         try:
             resp = connection.getresponse()
@@ -136,6 +136,27 @@ class FSQConnector(BaseConnector):
         BaseConnector.read_response(self, response)
 
 
+class GoogleConnector(BaseConnector):
+    """
+    Class to make a request to Google API and retrieve
+    data.
+    """
+    def __init__(self, request, callback=None):
+        BaseConnector.__init__(self, request, callback)
+    
+    def __str__(self):
+        return self.__class__.__name__
+    
+    def __unicode(self):
+        return self.__class__.__name__
+
+    def run(self):
+        BaseConnector.run(self)
+    
+    def read_response(self, response):
+        BaseConnector.read_response(self, response)
+
+
 class Parser(threading.Thread):
     def __init__(self, data, callback):
         self._data = data
@@ -188,22 +209,22 @@ if __name__ == "__main__":
     # Create a userless url, using the client id, the client secret 
     # and the current date in the specified format.
     # More about userless: https://developer.foursquare.com/overview/auth.html
-    URL = "/v2/venues/search?ll={lat},{long}&client_id={client_id}&client_secret={client_secret}&v={date}".format(client_id=CLIENT_ID, client_secret=CLIENT_SEC, date=DATE, lat="35.339879", long="25.134591")
-    
-    r = Request({"host": "api.foursquare.com", "url": URL, "typeofreq": "GET"})
+    r = Request("api.foursquare.com", "/v2/venues/search?", "GET", {"ll": "35.33879,25.134591", "client_id": CLIENT_ID, "client_secret": CLIENT_SEC, "v": DATE})
     connector = FSQConnector(r)
+    #connector = BaseConnector(r)
     connector.start()
 
     # Create a userless url, using the client id, the client secret 
     # and the current date in the specified format.
     # More about userless: http://www.yelp.com/developers/documentation/search_api#sampleResponse
-    #URL = 'business_review_search?term=yelp&tl_lat=37.9&tl_long=-122.5&br_lat=37.788022&br_long=-122.399797&limit=3&ywsid=XXXXXXXXXXXXXXXXXX'
-    #r = Request({'host': 'api.yelp.com', 'url': URL, 'typeofreq': 'GET'})
-    #connector = YelpConnector(r)
-    #connector.start()
+    r = Request('api.yelp.com', "/business_review_search?", "GET", {'term': 'yelp', "tl_lat": "37.9", "tl_long": "-122.5", "br_lat": "37.788022", "br_long": "-122.399797", "limit": "3", "ywsid": "WWWW"})
+    print r.url, r.host, r.typeOfReq
     
-    #URL = "/maps/api/service/output?params"
-    #r = Request({"host": "maps.googleapis.com", "url": URL, "typeofreq": "GET"})
-    #connector = GoogleConnector(r)
-    #connector.start()
+    connector = YelpConnector(r)
+    connector.start()
+    
+    # URL = "/maps/api/service/output?"
+    # r = Request("maps.googleapis.com", URL, "GET")
+    # connector = GoogleConnector(r)
+    # connector.start()
     
