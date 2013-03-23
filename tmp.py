@@ -1,5 +1,6 @@
 debug = True
 
+from datetime import datetime
 
 HOST = "api.foursquare.com"
 CLIENT_ID = "HPJBJ03G22E0YPJPP1WS1IL4TRG5QZE011QKXTA2MLHLYDSQ"

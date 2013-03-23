@@ -5,15 +5,15 @@
 from datetime import datetime
 
 class Request(object):
-    def __init__(self, host, url, typeOfReq, params=None):
+    def __init__(self, host, typeOfReq, url=None, params=None):
         self.params = params
         self.host = host
         self.typeOfReq = typeOfReq
         if self.params != None:
-            self.url = url + '&'.join(["%s=%s" % (k, v) for k, v in self.params.items()])
+            self.url = url + "&".join(["%s=%s" % (k, v) for k, v in self.params.items()])
         else:
             self.url = url
-        
+            
     def __unicode__(self):
         return u"<%s: (%s)>" % (self.__class__.__name__, self.args)
         
@@ -24,10 +24,6 @@ class Request(object):
         return "<%s: (%s)>" % (self.__class__.__name__, self.args)
 
 
-
-## --------------------------------------------------------------------------- ##
-## --------------------------------------------------------------------------- ##
-## --------------------------------------------------------------------------- ##
 
 
 # Sanity check...
@@ -52,14 +48,16 @@ if __name__ == "__main__":
     # Create a userless url, using the client id, the client secret 
     # and the current date in the specified format.
     # More about userless: https://developer.foursquare.com/overview/auth.html
-    r = Request("api.foursquare.com", "/v2/venues/search?", "GET", {"ll": "35.33879,25.134591", "client_id": CLIENT_ID, "client_secret": CLIENT_SEC, "v": DATE})
+    params = {'ll': '35.33879,25.134591', 'client_id': CLIENT_ID, 'client_secret': CLIENT_SEC, 'v': DATE}
+    r = Request('api.foursquare.com', 'GET', '/v2/venues/search?', params)
     print r.url, "\n"
     print r.host, r.typeOfReq
-
-    r = Request('api.yelp.com', "/business_review_search?", "GET", {'term': 'yelp', "tl_lat": "37.9", "tl_long": "-122.5", "br_lat": "37.788022", "br_long": "-122.399797", "limit": "3", "ywsid": "WWWW"})
-    print r.url, "\n"
+    
+    params = {'term': 'yelp', 'tl_lat': '37.9', 'tl_long': '-122.5', 'br_lat': '37.788022', 'br_long': '-122.399797', 'limit': '3', 'ywsid': 'WWWW'}
+    r = Request('api.yelp.com', 'GET', '/business_review_search?', params)
+    print r.url, '\n'
     print r.host, r.typeOfReq
 
-    r = Request('api.yelp.com', '/bin', "GET")
-    print r.url, "\n"
+    r = Request('api.call.com', 'GET')
+    print r.url, '\n'
     print r.host, r.typeOfReq

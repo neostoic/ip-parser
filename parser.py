@@ -4,7 +4,7 @@
 
 
 __author__ = "ipinak"
-__version__ = "0.1"
+__version__ = "0.1a"
 __copyright__ = "No copyright yet"
 
 debug = True
@@ -89,7 +89,11 @@ class BaseConnector(threading.Thread):
         connection.close()
         
     def read_response(self, response):
-        """Get the response from the stream and print it."""
+        """
+        Get the response from the stream and print it. When you 
+        subclass this, you can override it with another method to
+        handle the downloaded data differently.
+        """
         data = response.read()
         if debug:
             print(data, "\n")
@@ -133,7 +137,8 @@ class FSQConnector(BaseConnector):
         BaseConnector.run(self)
     
     def read_response(self, response):
-        BaseConnector.read_response(self, response)
+        JSONParser(response.read()).start()
+        #BaseConnector.read_response(self, response)
 
 
 class GoogleConnector(BaseConnector):
@@ -156,9 +161,11 @@ class GoogleConnector(BaseConnector):
     def read_response(self, response):
         BaseConnector.read_response(self, response)
 
-
 class Parser(threading.Thread):
-    def __init__(self, data, callback):
+    """
+    Base parser.
+    """
+    def __init__(self, data, callback=None):
         self._data = data
         self.callback = callback
         threading.Thread.__init__(self)
@@ -175,15 +182,48 @@ class Parser(threading.Thread):
             return locals()
     
     def __unicode__(self):
-        return u"<%s: %s>" % (self.__class__.__name__, self._func)
+        return u"<%s: %s>" % (self.__class__.__name__, self.callback)
     
     def run(self):
-        retVal = json.loads(self._data, sort_keys=True)
-        try:
-            self.callback(retVal)
-        except TypeError, e:
-            print("Error: %d - %s" % (e.errno, r.strerror))
+        pass
 
+
+class JSONParser(Parser):
+    """
+    JSON Parser.
+    """
+    def __init__(self, data, callback=None):
+        Parser.__init__(self, data, callback)
+    
+    def __unicode__(self):
+        return u"<%s: %s>" % (self.__class__.__name__, Parser.callback)
+    
+    def run(self):
+        self._retVal = json.dumps(self._data, sort_keys=True, indent=4, separators=(",", ": "))
+        try:
+            self.callback(self._retVal)
+        except TypeError, e:
+            print("Error: %s" % (e.args))
+        finally:
+            print self._data
+
+
+class XMLParser(threading.Thread):
+    """
+    XML Parser.
+    """
+    def __init__(self, data, callback=None):
+        Parser.__init__(self, data, callback)
+        
+    def __unicode__(self):
+        return u"<%s: %s>" % (self.__class__.__name__, Parser.callback)
+    
+    def run(self):
+        """
+        Parse the XML here...
+        """
+        pass
+        
 
 ###############################################################################
 
@@ -209,22 +249,24 @@ if __name__ == "__main__":
     # Create a userless url, using the client id, the client secret 
     # and the current date in the specified format.
     # More about userless: https://developer.foursquare.com/overview/auth.html
-    r = Request("api.foursquare.com", "/v2/venues/search?", "GET", {"ll": "35.33879,25.134591", "client_id": CLIENT_ID, "client_secret": CLIENT_SEC, "v": DATE})
+    params = {"ll": "35.33879,25.134591", "client_id": CLIENT_ID, "client_secret": CLIENT_SEC, "v": DATE}
+    r = Request("api.foursquare.com", "GET", "/v2/venues/search?", params)
     connector = FSQConnector(r)
-    #connector = BaseConnector(r)
-    connector.start()
+    #connector.start()
 
     # Create a userless url, using the client id, the client secret 
     # and the current date in the specified format.
     # More about userless: http://www.yelp.com/developers/documentation/search_api#sampleResponse
-    r = Request('api.yelp.com', "/business_review_search?", "GET", {'term': 'yelp', "tl_lat": "37.9", "tl_long": "-122.5", "br_lat": "37.788022", "br_long": "-122.399797", "limit": "3", "ywsid": "WWWW"})
+    params = {'term': 'yelp', "tl_lat": "37.9", "tl_long": "-122.5", "br_lat": "37.788022", "br_long": "-122.399797", "limit": "3", "ywsid": "WWWW"}
+    r = Request('api.yelp.com', "GET", "/business_review_search?", params)
     print r.url, r.host, r.typeOfReq
-    
     connector = YelpConnector(r)
-    connector.start()
+    #connector.start()
     
     # URL = "/maps/api/service/output?"
     # r = Request("maps.googleapis.com", URL, "GET")
     # connector = GoogleConnector(r)
     # connector.start()
-    
+    print "\n\n"
+    print help(r)
+    print help(connector)
