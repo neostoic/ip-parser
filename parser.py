@@ -109,7 +109,7 @@ class YelpConnector(BaseConnector):
     def __str__(self):
         return self.__class__.__name__
     
-    def __unicode(self):
+    def __unicode__(self):
         return self.__class__.__name__
 
     def run(self):
@@ -130,36 +130,16 @@ class FSQConnector(BaseConnector):
     def __str__(self):
         return self.__class__.__name__
     
-    def __unicode(self):
+    def __unicode__(self):
         return self.__class__.__name__
 
     def run(self):
         BaseConnector.run(self)
     
     def read_response(self, response):
-        JSONParser(response.read()).start()
+        JSONDumper(response.read()).start()
         #BaseConnector.read_response(self, response)
-
-
-class GoogleConnector(BaseConnector):
-    """
-    Class to make a request to Google API and retrieve
-    data.
-    """
-    def __init__(self, request, callback=None):
-        BaseConnector.__init__(self, request, callback)
-    
-    def __str__(self):
-        return self.__class__.__name__
-    
-    def __unicode(self):
-        return self.__class__.__name__
-
-    def run(self):
-        BaseConnector.run(self)
-    
-    def read_response(self, response):
-        BaseConnector.read_response(self, response)
+        
 
 class Parser(threading.Thread):
     """
@@ -188,7 +168,7 @@ class Parser(threading.Thread):
         pass
 
 
-class JSONParser(Parser):
+class JSONDumper(Parser):
     """
     JSON Parser.
     """
@@ -208,22 +188,6 @@ class JSONParser(Parser):
             print self._data
 
 
-class XMLParser(threading.Thread):
-    """
-    XML Parser.
-    """
-    def __init__(self, data, callback=None):
-        Parser.__init__(self, data, callback)
-        
-    def __unicode__(self):
-        return u"<%s: %s>" % (self.__class__.__name__, Parser.callback)
-    
-    def run(self):
-        """
-        Parse the XML here...
-        """
-        pass
-        
 
 ###############################################################################
 
