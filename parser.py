@@ -194,8 +194,8 @@ class JSONDumper(Parser):
 
 if __name__ == "__main__":
     HOST = "api.foursquare.com"
-    CLIENT_ID = "HPJBJ03G22E0YPJPP1WS1IL4TRG5QZE011QKXTA2MLHLYDSQ"
-    CLIENT_SEC = "K2Z5YKW3BTVT1CYMQ242HQO4YMS3DDUXNL4GBGOWDTK402K2"
+    CLIENT_ID = "YOUR_CLIENT_ID"
+    CLIENT_SEC = "YOUR_CLIENT_SECRET"
     
     # Fix the date format to match YYYYMMDD
     d = datetime.now()
